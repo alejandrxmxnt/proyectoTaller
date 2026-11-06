@@ -1,43 +1,77 @@
-from flask import current_app, render_template
+from flask_appbuilder import ModelView
+from flask_appbuilder.models.sqla.interface import SQLAInterface 
+from .models import Departamento, Persona, Estacionamiento, Vehiculo, Paquete
+from . import appbuilder
 
-"""
-    Create your Model based REST API::
+class DepartamentoModelView(ModelView):
+    datamodel = SQLAInterface(Departamento)
+    label_columns = {
+        "numero": "Numero",
+        "torre": "Torre",
+        "piso": "Piso",
+        "capacidad_residentes": "Capacidad de Residentes",
+        "estado": "Estado"
+    }
+    list_columns = ["numero", "torre", "piso", "capacidad_residentes", "estado"]
+    show_columns = ["id_departamento", "numero", "torre", "piso", "capacidad_residentes", "estado"]
 
-    class MyModelApi(ModelRestApi):
-        datamodel = SQLAInterface(MyModel)
+    add_columns = ["numero", "torre", "piso", "capacidad_residentes", "estado"]
 
-    appbuilder.add_api(MyModelApi)
+    edit_columns = ["numero", "torre", "piso", "capacidad_residentes", "estado"]
 
+class PersonaModelView(ModelView):
+    datamodel = SQLAInterface(Persona)
+    label_columns = {
+        "nombre_completo": "Nombre Completo",
+        "cedula": "Cédula",
+        "celular": "Celular",
+        "correo": "Correo",
+        "tipo_persona": "Tipo de Persona", #propietario / arrendatario / familiar
+        "departamento": "Departamento"
+    }
+    list_columns = ["nombre_completo", "cedula", "celular", "correo", "tipo_persona", "departamento"]
+    
+    show_columns = ["nombre_completo", "cedula", "celular", "correo", "tipo_persona", "departamento"]
+    
+    add_columns = ["nombre_completo", "cedula", "celular", "correo", "tipo_persona", "departamento"]
 
-    Create your Views::
+    edit_columns = add_columns
 
+    search_columns = ["nombre_completo"]
+    order_columns = ["nombre_completo"]
 
-    class MyModelView(ModelView):
-        datamodel = SQLAInterface(MyModel)
+class EstacionamientoModelView(ModelView):
+    datamodel = SQLAInterface(Estacionamiento)
+    label_columns = {
+        "numero": "Número",
+        "ubicacion": "Ubicación",
+        "departamento": "Departamento",
+        "estado": "Estado"
+    }
+    list_columns = ["numero", "ubicacion", "departamento", "estado"]    
+    show_columns = ["numero", "ubicacion", "departamento", "estado"]
+    add_columns = ["numero", "ubicacion", "departamento", "estado"]
+    edit_columns = ["numero", "ubicacion", "departamento", "estado"]
+    search_columns = ["numero"]
+    order_columns = ["numero"]
 
+#REGISTRO
+appbuilder.add_view(
+    DepartamentoModelView,
+    "Modulo de Departamentos",
+    icon="fa-building",
+    category="Departamentos" 
+)
+appbuilder.add_view(
+    PersonaModelView,
+    "Modulo de Personas",
+    icon="fa-users",
+    category="Residentes"
+)
+appbuilder.add_view(
+    EstacionamientoModelView,
+    "Modulo de Estacionamientos",
+    icon="fa-car",
+    category="Estacionamientos"
+)
 
-    Next, register your Views on create_app Flask factory::
-
-
-    appbuilder.add_view(
-        MyModelView,
-        "My View",
-        icon="fa-folder-open-o",
-        category="My Category",
-        category_icon='fa-envelope'
-    )
-"""
-
-"""
-    Application wide 404 error handler
-"""
-
-
-@current_app.errorhandler(404)
-def page_not_found(e):
-    return (
-        render_template(
-            "404.html", base_template=appbuilder.base_template, appbuilder=appbuilder
-        ),
-        404,
-    )
