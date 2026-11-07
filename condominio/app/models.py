@@ -92,8 +92,6 @@ class Paquete(Model):
     cantidad = Column(Integer, default=1, nullable=False)
     fecha_recepcion = Column(Date, nullable=False)
     hora_recepcion = Column(Time, nullable=False)
-    fecha_entrega = Column(Date, nullable=True)
-    hora_entrega = Column(Time, nullable=True)
     estado = Column(Boolean, default=False, nullable=False)  # True = entregado, False = disponible
 
     def __repr__(self):
