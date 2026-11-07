@@ -72,7 +72,6 @@ class VehiculoModelView(ModelView):
     search_columns = ["patente"]
     order_columns = ["patente"]
 
-
 class PaqueteModelView(ModelView):
     datamodel = SQLAInterface(Paquete)
 
@@ -82,7 +81,6 @@ class PaqueteModelView(ModelView):
         "destinatario": "Destinatario",
         "cantidad": "Cantidad",
         "fecha_recepcion": "Fecha de Recepción",
-        "hora_recepcion": "Hora de Recepción",
         "estado": "Estado"
     }
 
@@ -95,15 +93,7 @@ class PaqueteModelView(ModelView):
         "estado"
     ]
 
-    show_columns = [
-        "empresa",
-        "departamento",
-        "destinatario",
-        "cantidad",
-        "fecha_recepcion",
-        "hora_recepcion",
-        "estado"
-    ]
+    show_columns = list_columns
 
     add_columns = [
         "empresa",
@@ -111,12 +101,116 @@ class PaqueteModelView(ModelView):
         "destinatario",
         "cantidad",
         "fecha_recepcion",
-        "hora_recepcion",
         "estado"
     ]
 
     edit_columns = add_columns
 
+    # Evitar que FAB intente buscar por hora_recepcion
+    search_columns = [
+        "cantidad",
+        "estado"
+    ]
+
+    order_columns = [
+        "fecha_recepcion"
+    ]
+
+#class PaqueteModelView(ModelView):
+#    datamodel = SQLAInterface(Paquete)
+#
+#    label_columns = {
+#        "empresa": "Empresa de Mensajería",
+#        "departamento": "Departamento",
+#        "destinatario": "Destinatario",
+#        "cantidad": "Cantidad",
+#        "fecha_recepcion": "Fecha de Recepción",
+#        "estado": "Estado"
+#    }
+#
+#    list_columns = [
+#        "empresa",
+#        "departamento",
+#        "destinatario",
+#        "cantidad",
+#        "fecha_recepcion",
+#        "estado"
+#    ]
+#
+#    show_columns = [
+#        "empresa",
+#        "departamento",
+#        "destinatario",
+#        "cantidad",
+#        "fecha_recepcion",
+#        "estado"
+#    ]
+#
+#    add_columns = [
+#        "empresa",
+#        "departamento",
+#        "destinatario",
+#        "cantidad",
+#        "fecha_recepcion",
+#        "estado"
+#    ]
+#
+#    edit_columns = add_columns
+
+##carga la vista pero no permite agregar paquetes, solo verlos.
+#class PaqueteModelView(ModelView):
+#    datamodel = SQLAInterface(Paquete)
+#
+#    list_columns = [
+#        "empresa",
+#        "departamento",
+#        "destinatario",
+#        "cantidad",
+#        "fecha_recepcion",
+#        "hora_recepcion",
+#        "estado"
+#    ]
+#
+#    show_columns = list_columns
+#    add_columns = list_columns
+#    edit_columns = list_columns
+#
+#    search_columns = ["cantidad"]
+
+#class PaqueteModelView(ModelView):
+#    datamodel = SQLAInterface(Paquete)
+#
+#    list_columns = [
+#        "empresa",
+#        "departamento",
+#        "destinatario",
+#        "cantidad",
+#        "fecha_recepcion",
+#        "estado"
+#    ]
+#
+#    add_columns = [
+#        "empresa",
+#        "departamento",
+#        "destinatario",
+#        "cantidad",
+#        "fecha_recepcion",
+#        "estado"
+#    ]
+#
+#    edit_columns = add_columns
+#
+#    show_columns = [
+#        "empresa",
+#        "departamento",
+#        "destinatario",
+#        "cantidad",
+#        "fecha_recepcion",
+#        "hora_recepcion",
+#        "estado"
+#    ]
+#
+#    search_columns = ["cantidad"]
 
 class EmpresaMensajeriaModelView(ModelView):
     datamodel = SQLAInterface(EmpresaMensajeria)
