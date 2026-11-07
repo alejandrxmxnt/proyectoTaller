@@ -1,4 +1,4 @@
-from flask_appbuilder import ModelView
+from flask_appbuilder import BaseView, ModelView, expose
 from flask_appbuilder.models.sqla.interface import SQLAInterface 
 from .models import Departamento, Persona, Estacionamiento, Vehiculo, EmpresaMensajeria, Paquete
 from . import appbuilder
@@ -287,3 +287,17 @@ appbuilder.add_view(
     category="Paquetes"
 )   
 
+class DashboardView(BaseView):
+    route_base = "/dashboard"
+    default_view = "index"
+
+    @expose("/")
+    def index(self):
+        return self.render_template("dashboard.html")
+
+appbuilder.add_view(
+    DashboardView,
+    "Dashboard",
+    icon="fa-dashboard",
+    category="Menu Principal"
+)
