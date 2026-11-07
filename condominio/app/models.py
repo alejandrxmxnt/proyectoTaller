@@ -1,7 +1,7 @@
 from flask_appbuilder import Model
 from sqlalchemy import Boolean, Column, Date, ForeignKey, Integer, String, Time
 from sqlalchemy.orm import relationship
-
+from datetime import time
 
 # Cada clase hereda de Model (Flask AppBuilder). Cada atributo representa una columna de la tabla.
 # Las relaciones se declaran en la tabla "padre" (lado 1) con relationship() y backref.
@@ -91,9 +91,7 @@ class Paquete(Model):
     id_destinatario = Column(Integer, ForeignKey("personas.id_persona"), nullable=False)
     cantidad = Column(Integer, default=1, nullable=False)
     fecha_recepcion = Column(Date, nullable=False)
-    hora_recepcion = Column(Time, nullable=False)
-    fecha_entrega = Column(Date, nullable=True)
-    hora_entrega = Column(Time, nullable=True)
+    hora_recepcion = Column(Time, nullable=False, default=time(0, 0))  # Hora de recepción del paquete
     estado = Column(Boolean, default=False, nullable=False)  # True = entregado, False = disponible
 
     def __repr__(self):
