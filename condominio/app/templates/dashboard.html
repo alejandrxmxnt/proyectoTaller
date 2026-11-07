@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Paquetería & Asistente IA</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="h-full font-sans antialiased text-slate-800 bg-slate-50">
+
+    <div class="min-h-screen flex flex-col">
+
+        <!-- HEADER / TOP NAVIGATION -->
+        <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+                
+                <!-- Branding -->
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
+                        <i class="fa-solid fa-box-archive text-lg"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h1 class="font-bold text-slate-900 tracking-tight text-lg leading-none">Gestión del Condominio</h1>
+                            <span class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-200">En línea</span>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-0.5">Control residencial y notificación inteligente</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN DASHBOARD CONTENT -->
+        <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+            <!-- MAIN GRID: REGISTRATION FORM / DETAILS (LEFT 7 COLS) & AI PANEL (RIGHT 5 COLS) -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+                <!-- RIGHT COLUMN: AI ASSISTANT PANEL (5 COLS) -->
+                <div class="lg:col-span-5">
+                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden flex flex-col">
+                        
+                        <!-- Panel Header -->
+                        <div class="p-4 bg-gradient-to-r from-indigo-600 via-indigo-700 to-violet-700 text-white flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/20">
+                                    <i class="fa-solid fa-wand-magic-sparkles text-sm"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-sm leading-tight">Asistente de IA</h3>
+                                    <p class="text-[11px] text-indigo-100">Consultas e informes automatizados</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="p-5 space-y-4">
+
+                            <!-- Chat Output Showcase Card -->
+                            <div class="space-y-2">
+                                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Respuesta de IA</span>
+                                <div class="bg-indigo-50/60 border border-indigo-100 rounded-2xl p-4 text-xs text-slate-700 leading-relaxed">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <i class="fa-solid fa-robot text-indigo-600 text-sm"></i>
+                                        <span class="font-bold text-slate-900 text-xs">Asistente Inteligente</span>
+                                    </div>
+                                    <div id="chat">
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Input Text Form -->
+                            <form id="form" class="space-y-3 pt-2">
+                                <label for="mensaje" class="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">
+                                    Ingrese su pregunta
+                                </label>
+
+                                <input type="text" id="mensaje" name="mensaje" placeholder="Escriba su consulta" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all" />
+
+                                <button class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs px-4 py-2.5 rounded-xl transition-all shadow-xs flex items-center justify-center gap-2" id="enviar" type="submit">
+                                    <i class="fa-solid fa-paper-plane text-xs"></i>
+                                    <span>Enviar Pregunta</span>
+                                </button>
+                            </form>
+                            <script>
+                                /*
+                                const formulario = document.getElementById('form');
+                                const mensajeInput = document.getElementById('mensaje');
+                                const chat = document.getElementById('chat');
+                                const button = document.getElementById('enviar');
+                                const historico = [];
+
+                                function mostrarMensaje(autor, texto) {
+                                    const mensaje = document.createElement('P');
+                                    const titulo = document.createElement('strong');
+                                    titulo.textContent = autor + ': ';
+                                    mensaje.appendChild(titulo);
+                                    mensaje.appendChild(document.createTextNode(texto));
+                                    chat.appendChild(mensaje);
+                                    return mensaje;
+                                }
+
+                                formulario.addEventListener('submit', async (e) => {
+                                    e.preventDefault();
+                                    const mensaje = mensajeinput.value.trim();
+                                    mostrarMensaje('Adrian Motaño', mensaje);
+                                    const historialMensaje = historico ;
+                                    historico.push({ role: 'user', content: mensaje 
+                                    });
+                                    input.value = '';
+                                    const loading = mostrarMensaje('Asistente Inteligente', 'Cargando...');
+                                    try{
+                                        
+                                        const response = await fetch('api/asistente', {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'application/json'
+                                            },
+                                            body: JSON.stringify({ 
+                                                message: mensaje,
+                                                history: historialMensaje 
+                                            })
+                                        });
+                                        const data = await response.json();
+                                        if(!response.ok){
+                                            throw new Error('Error del servidor');
+                                        }
+                                        historico.push({
+                                            role: '/api/asistente',
+                                            content: data 
+                                        })
+
+                                        loading.remove();
+                                        mostrarMensaje('Asistente Inteligente', data.respuesta);
+
+                                    }catch(error){
+                                        mostrarMensaje("Grook error",error)
+                                    }
+                                });*/
+
+
+                                const formulario = document.getElementById('form');
+                                const mensajeInput = document.getElementById('mensaje');
+                                const chat = document.getElementById('chat');
+                                const button = document.getElementById('enviar');
+                                                            
+                                const historico = [];
+                                                            
+                                function mostrarMensaje(autor, texto) {
+                                    const mensaje = document.createElement('p');
+                                    const titulo = document.createElement('strong');
+                                
+                                    titulo.textContent = autor + ': ';
+                                    mensaje.appendChild(titulo);
+                                    mensaje.appendChild(document.createTextNode(texto));
+                                
+                                    chat.appendChild(mensaje);
+                                
+                                    return mensaje;
+                                }
+                                
+                                formulario.addEventListener('submit', async (e) => {
+                                    e.preventDefault();
+                                
+                                    const mensaje = mensajeInput.value.trim();
+                                
+                                    if (!mensaje) {
+                                        return;
+                                    }
+                                
+                                    mostrarMensaje('Adrian Montaño', mensaje);
+                                
+                                    // Guardar la pregunta del usuario
+                                    historico.push({
+                                        role: 'user',
+                                        content: mensaje
+                                    });
+                                
+                                    // Limpiar el campo
+                                    mensajeInput.value = '';
+                                
+                                    // Mostrar indicador de carga
+                                    const loading = mostrarMensaje(
+                                        'Asistente Inteligente',
+                                        'Cargando...'
+                                    );
+                                
+                                    button.disabled = true;
+                                
+                                    try {
+                                    
+                                        const response = await fetch('/api/asistente', {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'application/json'
+                                            },
+                                            body: JSON.stringify({
+                                                mensaje: mensaje,
+                                                history: historico.slice(0, -1)
+                                            })
+                                        });
+                                    
+                                        const data = await response.json();
+                                    
+                                        if (!response.ok) {
+                                            throw new Error(data.error || 'Error del servidor');
+                                        }
+                                    
+                                        // Eliminar indicador de carga
+                                        loading.remove();
+                                    
+                                        // Mostrar respuesta de IA
+                                        mostrarMensaje(
+                                            'Asistente Inteligente',
+                                            data.respuesta
+                                        );
+                                    
+                                        // Guardar respuesta en el historial
+                                        historico.push({
+                                            role: 'assistant',
+                                            content: data.respuesta
+                                        });
+                                    
+                                    } catch (error) {
+                                    
+                                        loading.remove();
+                                    
+                                        mostrarMensaje(
+                                            'Error',
+                                            error.message
+                                        );
+                                    
+                                        console.error('Error al consultar IA:', error);
+                                    
+                                    } finally {
+                                    
+                                        button.disabled = false;
+                                    
+                                    }
+                                });
+
+                            </script>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+</body>
+</html>

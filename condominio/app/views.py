@@ -1,43 +1,303 @@
-from flask import current_app, render_template
+from flask_appbuilder import BaseView, ModelView, expose
+from flask_appbuilder.models.sqla.interface import SQLAInterface 
+from .models import Departamento, Persona, Estacionamiento, Vehiculo, EmpresaMensajeria, Paquete
+from . import appbuilder
 
-"""
-    Create your Model based REST API::
+class DepartamentoModelView(ModelView):
+    datamodel = SQLAInterface(Departamento)
+    label_columns = {
+        "numero": "Numero",
+        "torre": "Torre",
+        "piso": "Piso",
+        "capacidad_residentes": "Capacidad de Residentes",
+        "estado": "Estado"
+    }
+    list_columns = ["numero", "torre", "piso", "capacidad_residentes", "estado"]
+    show_columns = ["departamento", "numero", "torre", "piso", "capacidad_residentes", "estado"]
 
-    class MyModelApi(ModelRestApi):
-        datamodel = SQLAInterface(MyModel)
+    add_columns = ["numero", "torre", "piso", "capacidad_residentes", "estado"]
 
-    appbuilder.add_api(MyModelApi)
+    edit_columns = ["numero", "torre", "piso", "capacidad_residentes", "estado"]
 
+class PersonaModelView(ModelView):
+    datamodel = SQLAInterface(Persona)
+    label_columns = {
+        "nombre_completo": "Nombre Completo",
+        "cedula": "Cédula",
+        "celular": "Celular",
+        "correo": "Correo",
+        "tipo_persona": "Tipo de Persona", #propietario / arrendatario / familiar
+        "departamento": "Departamento"
+    }
+    list_columns = ["nombre_completo", "cedula", "celular", "correo", "tipo_persona", "departamento"]
+    
+    show_columns = ["nombre_completo", "cedula", "celular", "correo", "tipo_persona", "departamento"]
+    
+    add_columns = ["nombre_completo", "cedula", "celular", "correo", "tipo_persona", "departamento"]
 
-    Create your Views::
+    edit_columns = add_columns
 
+    search_columns = ["nombre_completo"]
+    order_columns = ["nombre_completo"]
 
-    class MyModelView(ModelView):
-        datamodel = SQLAInterface(MyModel)
+class EstacionamientoModelView(ModelView):
+    datamodel = SQLAInterface(Estacionamiento)
+    label_columns = {
+        "numero": "Número",
+        "ubicacion": "Ubicación",
+        "departamento": "Departamento",
+        "estado": "Estado"
+    }
+    list_columns = ["numero", "ubicacion", "departamento", "estado"]    
+    show_columns = ["numero", "ubicacion", "departamento", "estado"]
+    add_columns = ["numero", "ubicacion", "departamento", "estado"]
+    edit_columns = ["numero", "ubicacion", "departamento", "estado"]
+    search_columns = ["numero"]
+    order_columns = ["numero"]
 
+class VehiculoModelView(ModelView):
+    datamodel = SQLAInterface(Vehiculo)
+    label_columns = {
+        "patente": "Patente",
+        "marca": "Marca",
+        "modelo": "Modelo",
+        "color": "Color",
+        "persona": "Propietario",
+        "estacionamiento": "Estacionamiento"
+    }
+    list_columns = ["patente", "marca", "modelo", "color", "persona", "estacionamiento"]
+    show_columns = ["patente", "marca", "modelo", "color", "persona", "estacionamiento"]
+    add_columns = ["patente", "marca", "modelo", "color", "persona", "estacionamiento"]
+    edit_columns = ["patente", "marca", "modelo", "color", "persona", "estacionamiento"]
+    search_columns = ["patente"]
+    order_columns = ["patente"]
 
-    Next, register your Views on create_app Flask factory::
+class PaqueteModelView(ModelView):
+    datamodel = SQLAInterface(Paquete)
 
+    label_columns = {
+        "empresa": "Empresa de Mensajería",
+        "departamento": "Departamento",
+        "destinatario": "Destinatario",
+        "cantidad": "Cantidad",
+        "fecha_recepcion": "Fecha de Recepción",
+        "estado": "Estado"
+    }
 
-    appbuilder.add_view(
-        MyModelView,
-        "My View",
-        icon="fa-folder-open-o",
-        category="My Category",
-        category_icon='fa-envelope'
-    )
-"""
+    list_columns = [
+        "empresa",
+        "departamento",
+        "destinatario",
+        "cantidad",
+        "fecha_recepcion",
+        "estado"
+    ]
 
-"""
-    Application wide 404 error handler
-"""
+    show_columns = list_columns
 
+    add_columns = [
+        "empresa",
+        "departamento",
+        "destinatario",
+        "cantidad",
+        "fecha_recepcion",
+        "estado"
+    ]
 
-@current_app.errorhandler(404)
-def page_not_found(e):
-    return (
-        render_template(
-            "404.html", base_template=appbuilder.base_template, appbuilder=appbuilder
-        ),
-        404,
-    )
+    edit_columns = add_columns
+
+    # Evitar que FAB intente buscar por hora_recepcion
+    search_columns = [
+        "cantidad",
+        "estado"
+    ]
+
+    order_columns = [
+        "fecha_recepcion"
+    ]
+
+#class PaqueteModelView(ModelView):
+#    datamodel = SQLAInterface(Paquete)
+#
+#    label_columns = {
+#        "empresa": "Empresa de Mensajería",
+#        "departamento": "Departamento",
+#        "destinatario": "Destinatario",
+#        "cantidad": "Cantidad",
+#        "fecha_recepcion": "Fecha de Recepción",
+#        "estado": "Estado"
+#    }
+#
+#    list_columns = [
+#        "empresa",
+#        "departamento",
+#        "destinatario",
+#        "cantidad",
+#        "fecha_recepcion",
+#        "estado"
+#    ]
+#
+#    show_columns = [
+#        "empresa",
+#        "departamento",
+#        "destinatario",
+#        "cantidad",
+#        "fecha_recepcion",
+#        "estado"
+#    ]
+#
+#    add_columns = [
+#        "empresa",
+#        "departamento",
+#        "destinatario",
+#        "cantidad",
+#        "fecha_recepcion",
+#        "estado"
+#    ]
+#
+#    edit_columns = add_columns
+
+##carga la vista pero no permite agregar paquetes, solo verlos.
+#class PaqueteModelView(ModelView):
+#    datamodel = SQLAInterface(Paquete)
+#
+#    list_columns = [
+#        "empresa",
+#        "departamento",
+#        "destinatario",
+#        "cantidad",
+#        "fecha_recepcion",
+#        "hora_recepcion",
+#        "estado"
+#    ]
+#
+#    show_columns = list_columns
+#    add_columns = list_columns
+#    edit_columns = list_columns
+#
+#    search_columns = ["cantidad"]
+
+#class PaqueteModelView(ModelView):
+#    datamodel = SQLAInterface(Paquete)
+#
+#    list_columns = [
+#        "empresa",
+#        "departamento",
+#        "destinatario",
+#        "cantidad",
+#        "fecha_recepcion",
+#        "estado"
+#    ]
+#
+#    add_columns = [
+#        "empresa",
+#        "departamento",
+#        "destinatario",
+#        "cantidad",
+#        "fecha_recepcion",
+#        "estado"
+#    ]
+#
+#    edit_columns = add_columns
+#
+#    show_columns = [
+#        "empresa",
+#        "departamento",
+#        "destinatario",
+#        "cantidad",
+#        "fecha_recepcion",
+#        "hora_recepcion",
+#        "estado"
+#    ]
+#
+#    search_columns = ["cantidad"]
+
+class EmpresaMensajeriaModelView(ModelView):
+    datamodel = SQLAInterface(EmpresaMensajeria)
+
+    label_columns = {
+        "nombre_empresa": "Nombre de la Empresa",
+        "datos_empresa": "Datos de la Empresa",
+        "telefono": "Teléfono",
+        "correo": "Correo"
+    }
+
+    list_columns = [
+        "nombre_empresa",
+        "telefono",
+        "correo"
+    ]
+
+    show_columns = [
+        "nombre_empresa",
+        "datos_empresa",
+        "telefono",
+        "correo"
+    ]
+
+    add_columns = [
+        "nombre_empresa",
+        "datos_empresa",
+        "telefono",
+        "correo"
+    ]
+
+    edit_columns = add_columns
+
+    search_columns = ["nombre_empresa"]
+    order_columns = ["nombre_empresa"]
+
+#REGISTRO
+appbuilder.add_view(
+    DepartamentoModelView,
+    "Modulo de Departamentos",
+    icon="fa-building",
+    category="Departamentos" 
+)
+appbuilder.add_view(
+    PersonaModelView,
+    "Modulo de Personas",
+    icon="fa-users",
+    category="Residentes"
+)
+appbuilder.add_view(
+    EstacionamientoModelView,
+    "Modulo de Estacionamientos",
+    icon="fa-car",
+    category="Estacionamientos"
+)
+appbuilder.add_view(
+    VehiculoModelView,
+    "Modulo de Vehiculos",
+    icon="fa-car",
+    category="Vehiculos"
+)
+
+appbuilder.add_view(
+    EmpresaMensajeriaModelView,
+    "Modulo de Empresas de Mensajería",
+    icon="fa-truck",
+    category="Paquetes"
+)
+
+appbuilder.add_view(
+    PaqueteModelView,
+    "Modulo de Paquetes",
+    icon="fa-box",
+    category="Paquetes"
+)   
+
+class DashboardView(BaseView):
+    route_base = "/dashboard"
+    default_view = "index"
+
+    @expose("/")
+    def index(self):
+        return self.render_template("dashboard.html")
+
+appbuilder.add_view(
+    DashboardView,
+    "Dashboard",
+    icon="fa-dashboard",
+    category="Menu Principal"
+)

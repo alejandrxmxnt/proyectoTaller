@@ -9,6 +9,13 @@ def create_app() -> Flask:
     with app.app_context():
         #db.create_all()
         appbuilder.init_app(app, db.session)
+        from . import models 
+        from .models import Departamento, Persona, Estacionamiento, Vehiculo, Paquete
+        from . import views
+
+        #registrar la view de ia
+        from .ai.asistente_ai import asistente_bp
+        app.register_blueprint(asistente_bp)
     return app
 
 app = create_app()

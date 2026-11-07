@@ -5,4 +5,5 @@ app.db
 .idea
 env
 venv
+.env
 *.sublime*
