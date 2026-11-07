@@ -57,50 +57,6 @@
 
         <!-- MAIN DASHBOARD CONTENT -->
         <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-
-            <!-- KPI SUMMARY CARDS -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
-                
-                <!-- KPI 1: Total Residentes -->
-                <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between hover:border-slate-300 transition-all">
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total de Residentes</p>
-                        <h3 class="text-3xl font-bold text-slate-900 mt-1">128</h3>
-                    </div>
-                    <div class="w-13 h-13 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl p-3">
-                        <i class="fa-solid fa-users"></i>
-                    </div>
-                </div>
-
-                <!-- KPI 2: Paquetes en Custodia -->
-                <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between hover:border-slate-300 transition-all">
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Paquetes en Custodia</p>
-                            <span class="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
-                        </div>
-                        <h3 class="text-3xl font-bold text-amber-600 mt-1">14</h3>
-                        <span class="text-xs text-amber-700 font-medium mt-1 block">Pendientes de retiro</span>
-                    </div>
-                    <div class="w-13 h-13 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-2xl p-3">
-                        <i class="fa-solid fa-boxes-packing"></i>
-                    </div>
-                </div>
-
-                <!-- KPI 3: Vehículos Existentes -->
-                <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between hover:border-slate-300 transition-all">
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Vehículos Registrados</p>
-                        <h3 class="text-3xl font-bold text-slate-900 mt-1">86</h3>
-                        <span class="text-xs text-emerald-600 font-medium mt-1 block"><i class="fa-solid fa-square-parking mr-1"></i>Estacionamientos activos</span>
-                    </div>
-                    <div class="w-13 h-13 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl p-3">
-                        <i class="fa-solid fa-car-side"></i>
-                    </div>
-                </div>
-
-            </div>
-
             <!-- MAIN GRID: REGISTRATION FORM / DETAILS (LEFT 7 COLS) & AI PANEL (RIGHT 5 COLS) -->
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
@@ -131,23 +87,80 @@
                                         <i class="fa-solid fa-robot text-indigo-600 text-sm"></i>
                                         <span class="font-bold text-slate-900 text-xs">Asistente Inteligente</span>
                                     </div>
-                                    Actualmente hay **14 paquetes en custodia** repartidos entre 10 apartamentos. El residente con mayor número de entregas pendientes es el Apt 401.
+                                    <div id="chat">
+
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- Textarea & Prompt Input -->
-                            <div class="space-y-2 pt-2">
-                                <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Ingrese su pregunta</label>
-                                <div class="space-y-3">
-                                    <textarea rows="4" placeholder="Escriba su consulta o redacte una plantilla..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all resize-none"></textarea>
-                                    
-                                    <button class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs px-4 py-2.5 rounded-xl transition-all shadow-xs flex items-center justify-center gap-2">
-                                        <i class="fa-solid fa-paper-plane text-xs"></i>
-                                        <span>Enviar Pregunta</span>
-                                    </button>
-                                </div>
-                            </div>
+                            <!-- Input Text Form -->
+                            <form id="form" class="space-y-3 pt-2">
+                                <label for="mensaje" class="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">
+                                    Ingrese su pregunta
+                                </label>
 
+                                <input type="text" id="mensaje" name="mensaje" placeholder="Escriba su consulta" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all" />
+
+                                <button class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs px-4 py-2.5 rounded-xl transition-all shadow-xs flex items-center justify-center gap-2" id="enviar" type="submit">
+                                    <i class="fa-solid fa-paper-plane text-xs"></i>
+                                    <span>Enviar Pregunta</span>
+                                </button>
+                            </form>
+                            <script>
+                                const formulario = document.getElementById('form');
+                                const mensajeInput = document.getElementById('mensaje');
+                                const chat = document.querySelector('chat');
+                                const button = document.getElementById('enviar');
+                                const historico = [];
+
+                                function mostrarMensaje(autor, texto) {
+                                    const mensaje = document.createElement('P');
+                                    const titulo = document.createElement('strong');
+                                    titulo.textContent = autor + ': ';
+                                    mensaje.appendChild(titulo);
+                                    mensaje.appendChild(document.createTextNode(texto));
+                                    chat.appendChild(mensaje);
+                                    return mensaje;
+                                }
+
+                                formulario.addEventListener('submit', async (e) => {
+                                    e.preventDefault();
+                                    const mensaje = input.value.trim();
+                                    mostrarMensaje('Adrian Motaño', mensaje);
+                                    const historialMensaje = historico ;
+                                    histrico.push({ role: 'user', content: mensaje 
+                                    });
+                                    input.value = '';
+                                    const loading = mostrarMensaje('Asistente Inteligente', 'Cargando...');
+                                    try{
+                                        //{% comment %} envio de request {% endcomment %}
+                                        const response = await fetch('api/asistente', {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'application/json'
+                                            },
+                                            body: JSON.stringify({ 
+                                                message: mensaje,
+                                                history: historialMensaje 
+                                            })
+                                        });
+                                        const data = await response.json();
+                                        if(!response.ok){
+                                            throw new Error('Error del servidor');
+                                        }
+                                        historico.push({
+                                            role: '/api/asistente',
+                                            content: data 
+                                        })
+
+                                        loading.remove();
+                                        mostrarMensaje('Respuesta del grook', data);
+
+                                    }catch(error){
+                                        mostrarMensaje("Grook error",error)
+                                    }
+                                });
+                            </script>
                         </div>
 
                     </div>
