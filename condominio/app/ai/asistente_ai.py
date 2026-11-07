@@ -1,46 +1,14 @@
 
-#import os
-#import logging
-#import flask 
-#from openai import OpenAI
-#import Blueprint, request, jsonify
-#logger = logging.getLogger(__name__)
-#
-#asistente_bp = Blueprint(
-#    "asistente_ai", 
-#    __name__,
-#    url = "/api"
-#)
-#
-##llamar a nuestra configuracion .env
-#def obtenerInformacion ():
-#    api_key = os.getenv("AI_API_KEY").strip()
-#    base_url = os.getenv("AI_URL").strip()
-#
-#    cliente = OpenAI(api_key=api_key, base_url=base_url)
-#    return cliente
-#@asistente_bp.post("/asistente")
-#
-#def consultar_asistente():
-#    data = request.get_json(Silent=True)
-#    mensaje = data.get()("mensaje","")
-#    mensaje = mensaje.strip()
-#
-#    mensaje = [
-#        {
-#            "role": "system", 
-#            "content": "Eres un asistente de IA que ayuda a los residentes de un condominio a responder preguntas sobre la administración del condominio, reglas, servicios y cualquier otra consulta relacionada con la vida en el condominio. Proporciona respuestas claras y útiles."
-#            }
-#    ]
-
-
-
-
 import os
 import logging
+import unicodedata
 
+from datetime import date
 from flask import Blueprint, request, jsonify
 from openai import OpenAI
+
+from app.extensions import db
+from app.models import Paquete
 
 logger = logging.getLogger(__name__)
 
@@ -50,72 +18,148 @@ asistente_bp = Blueprint(
     url_prefix="/api"
 )
 
-
-# Crear cliente de inteligencia artificial
 def obtenerInformacion():
 
     api_key = os.getenv("AI_API_KEY")
     base_url = os.getenv("AI_URL")
 
     if not api_key:
-        raise ValueError("No se encontró AI_API_KEY en el archivo .env")
+        raise ValueError("No se encontró AI_API_KEY")
 
     if not base_url:
-        raise ValueError("No se encontró AI_URL en el archivo .env")
+        raise ValueError("No se encontró AI_URL")
 
-    cliente = OpenAI(
+    return OpenAI(
         api_key=api_key,
         base_url=base_url
     )
 
-    return cliente
+# NORMALIZAR TEXTO
+
+def normalizar_texto(texto):
+
+    texto = texto.lower()
+
+    texto = unicodedata.normalize("NFD", texto)
+
+    texto = "".join(
+        caracter for caracter in texto
+        if unicodedata.category(caracter) != "Mn"
+    )
+
+    return texto
+
+# CONSULTAR BASE DE DATOS
+
+def obtener_datos_condominio(pregunta):
+
+    pregunta = normalizar_texto(pregunta)
+
+    # Consultar paquetes pendientes
+    if any(palabra in pregunta for palabra in [
+        "pendiente", "sin retirar", "por retirar"
+    ]):
+
+        total = db.session.query(Paquete).filter(
+            Paquete.estado.is_(False)
+        ).count()
+
+        return (
+            f"Hay {total} paquetes pendientes de retiro."
+        )
+
+    # Consultar paquetes entregados
+    elif any(palabra in pregunta for palabra in [
+        "entregado", "retirado"
+    ]):
+
+        total = db.session.query(Paquete).filter(
+            Paquete.estado.is_(True)
+        ).count()
+
+        return (
+            f"Hay {total} paquetes entregados."
+        )
+
+    # Consultar paquetes recibidos hoy
+    elif any(palabra in pregunta for palabra in [
+        "hoy", "este dia"
+    ]):
+
+        total = db.session.query(Paquete).filter(
+            Paquete.fecha_recepcion == date.today()
+        ).count()
+
+        return (
+            f"Hoy se recibieron {total} paquetes."
+        )
+
+    # Consultar total de paquetes
+    elif "paquete" in pregunta:
+
+        total = db.session.query(Paquete).count()
+
+        return (
+            f"El sistema tiene registrados {total} paquetes en total."
+        )
+
+    return None
 
 
-# Endpoint para consultar al asistente
+
 @asistente_bp.route("/asistente", methods=["POST"])
 def consultar_asistente():
 
     try:
+
         data = request.get_json(silent=True) or {}
 
         mensaje = data.get("mensaje", "").strip()
         historial = data.get("history", [])
 
         if not mensaje:
+
             return jsonify({
                 "error": "Debe ingresar una pregunta."
             }), 400
 
-        # Instrucciones principales de la IA
+        # Consultar información de la base de datos
+        informacion_bd = obtener_datos_condominio(mensaje)
+
+        if informacion_bd is None:
+            informacion_bd = (
+                "No se realizó ninguna consulta a la base de datos "
+                "para esta pregunta. No inventes cantidades ni "
+                "información administrativa."
+            )
+
+        # Instrucciones de la IA
         mensajes = [
             {
                 "role": "system",
-                "content": """
-                Eres un asistente inteligente especializado en la
-                administración de condominios.
+                "content": f"""
+                Eres un asistente inteligente especializado
+                en la administración de condominios.
 
-                Ayudas a los residentes a resolver consultas sobre:
-
-                - Administración del condominio.
-                - Recepción y retiro de paquetes.
-                - Normas de convivencia.
-                - Uso de áreas comunes.
-                - Servicios disponibles.
-                - Consultas generales de los residentes.
-
-                Responde siempre en español, de manera clara,
+                Responde siempre en español, de forma clara,
                 cordial y sencilla.
 
-                No inventes reglamentos, horarios, datos de
-                residentes ni información administrativa.
+                INFORMACIÓN DE LA BASE DE DATOS:
 
-                Si desconoces algún dato específico del condominio,
-                indícalo y recomienda consultar con administración.
+                {informacion_bd}
+
+                REGLAS:
+                - Utiliza los resultados proporcionados.
+                - No inventes cantidades ni estadísticas.
+                - No inventes información administrativa.
+                - Si no tienes información suficiente,
+                  indícalo claramente.
+                - No afirmes que consultaste datos si no lo hiciste.
                 """
             }
         ]
 
-        # Incorporar el historial de conversación
+        # Incorporar historial
         if isinstance(historial, list):
 
             for elemento in historial[-20:]:
@@ -126,13 +170,17 @@ def consultar_asistente():
                 rol = elemento.get("role")
                 contenido = elemento.get("content")
 
-                if rol in ("user", "assistant") and isinstance(contenido, str):
+                if (
+                    rol in ("user", "assistant")
+                    and isinstance(contenido, str)
+                ):
+
                     mensajes.append({
                         "role": rol,
                         "content": contenido[:4000]
                     })
 
-        # Agregar pregunta actual
+        # Pregunta actual
         mensajes.append({
             "role": "user",
             "content": mensaje
@@ -144,16 +192,20 @@ def consultar_asistente():
         respuesta = cliente.chat.completions.create(
             model=os.getenv("AI_MODEL", "gpt-4o-mini"),
             messages=mensajes,
-            temperature=0.7
+            temperature=0.3
         )
 
         texto_respuesta = respuesta.choices[0].message.content
+
+        if not texto_respuesta:
+            raise ValueError("La IA devolvió una respuesta vacía.")
 
         return jsonify({
             "respuesta": texto_respuesta
         }), 200
 
     except Exception:
+
         logger.exception("Error al consultar el asistente IA")
 
         return jsonify({

@@ -107,9 +107,10 @@
                                 </button>
                             </form>
                             <script>
+                                /*
                                 const formulario = document.getElementById('form');
                                 const mensajeInput = document.getElementById('mensaje');
-                                const chat = document.querySelector('chat');
+                                const chat = document.getElementById('chat');
                                 const button = document.getElementById('enviar');
                                 const historico = [];
 
@@ -125,10 +126,10 @@
 
                                 formulario.addEventListener('submit', async (e) => {
                                     e.preventDefault();
-                                    const mensaje = input.value.trim();
+                                    const mensaje = mensajeinput.value.trim();
                                     mostrarMensaje('Adrian Motaño', mensaje);
                                     const historialMensaje = historico ;
-                                    histrico.push({ role: 'user', content: mensaje 
+                                    historico.push({ role: 'user', content: mensaje 
                                     });
                                     input.value = '';
                                     const loading = mostrarMensaje('Asistente Inteligente', 'Cargando...');
@@ -154,12 +155,114 @@
                                         })
 
                                         loading.remove();
-                                        mostrarMensaje('Respuesta del grook', data);
+                                        mostrarMensaje('Asistente Inteligente', data.respuesta);
 
                                     }catch(error){
                                         mostrarMensaje("Grook error",error)
                                     }
+                                });*/
+
+
+                                const formulario = document.getElementById('form');
+                                const mensajeInput = document.getElementById('mensaje');
+                                const chat = document.getElementById('chat');
+                                const button = document.getElementById('enviar');
+                                                            
+                                const historico = [];
+                                                            
+                                function mostrarMensaje(autor, texto) {
+                                    const mensaje = document.createElement('p');
+                                    const titulo = document.createElement('strong');
+                                
+                                    titulo.textContent = autor + ': ';
+                                    mensaje.appendChild(titulo);
+                                    mensaje.appendChild(document.createTextNode(texto));
+                                
+                                    chat.appendChild(mensaje);
+                                
+                                    return mensaje;
+                                }
+                                
+                                formulario.addEventListener('submit', async (e) => {
+                                    e.preventDefault();
+                                
+                                    const mensaje = mensajeInput.value.trim();
+                                
+                                    if (!mensaje) {
+                                        return;
+                                    }
+                                
+                                    mostrarMensaje('Adrian Montaño', mensaje);
+                                
+                                    // Guardar la pregunta del usuario
+                                    historico.push({
+                                        role: 'user',
+                                        content: mensaje
+                                    });
+                                
+                                    // Limpiar el campo
+                                    mensajeInput.value = '';
+                                
+                                    // Mostrar indicador de carga
+                                    const loading = mostrarMensaje(
+                                        'Asistente Inteligente',
+                                        'Cargando...'
+                                    );
+                                
+                                    button.disabled = true;
+                                
+                                    try {
+                                    
+                                        const response = await fetch('/api/asistente', {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'application/json'
+                                            },
+                                            body: JSON.stringify({
+                                                mensaje: mensaje,
+                                                history: historico.slice(0, -1)
+                                            })
+                                        });
+                                    
+                                        const data = await response.json();
+                                    
+                                        if (!response.ok) {
+                                            throw new Error(data.error || 'Error del servidor');
+                                        }
+                                    
+                                        // Eliminar indicador de carga
+                                        loading.remove();
+                                    
+                                        // Mostrar respuesta de IA
+                                        mostrarMensaje(
+                                            'Asistente Inteligente',
+                                            data.respuesta
+                                        );
+                                    
+                                        // Guardar respuesta en el historial
+                                        historico.push({
+                                            role: 'assistant',
+                                            content: data.respuesta
+                                        });
+                                    
+                                    } catch (error) {
+                                    
+                                        loading.remove();
+                                    
+                                        mostrarMensaje(
+                                            'Error',
+                                            error.message
+                                        );
+                                    
+                                        console.error('Error al consultar IA:', error);
+                                    
+                                    } finally {
+                                    
+                                        button.disabled = false;
+                                    
+                                    }
                                 });
+
                             </script>
                         </div>
 
